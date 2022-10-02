@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Mon Jan 21 21:27:49 AST 2019:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.13.1.1 - (1765088): instance a816c00e-0168-71ab-27a0-000006d4b158 
+on database directory F:\Master\Thesis\Tools\Ontology\AWN\Alshmowkh\wordnety with class loader sun.misc.Launcher$AppClassLoader@1d44bcfa 
+Loaded from file:/F:/Master/Thesis/Tools/derby/db-derby-10.13.1.1-bin/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=1.8.0_31-b13
+user.dir=F:\Master\Thesis\Implementations\SAARR_7
+os.name=Windows 8.1
+os.arch=amd64
+os.version=6.3
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''

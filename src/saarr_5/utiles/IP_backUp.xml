@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+
+
+<root>
+    <inchoative>
+        /*
+        * To change this license header, choose License Headers in Project Properties.
+        * To change this template file, choose Tools | Templates
+        * and open the template in the editor.
+        */
+        package saarr_5.framework.inchoative_predicate;
+
+        import java.util.List;
+        import java.util.ListIterator;
+        import saarr_5.framework.phraser.Phrase;
+        import saarr_5.morphalize.Sentence;
+        import saarr_5.morphalize.Word;
+        import static saarr_5.utiles.Utile.pl;
+
+        /**
+        *
+        * @author bakee
+        */
+        public class Inchoative extends Phrase {
+
+        private Sentence sentence;
+        private Phrase lastPhrase;
+        private Inchoative inchoative;
+        private Word head;
+
+        public Inchoative(Sentence sent) {
+        sentence = sent;
+        //        inchoative=this.getInchoative();
+        //        head=this.getHead();
+
+        }
+
+        private Inchoative() {
+
+        }
+
+        public Inchoative getInchoative(ListIterator itr) {
+        Phrase ph, ph1, ph2;
+        Inchoative incho = new Inchoative();
+        if (itr.hasNext()) {
+        ph = (Phrase) itr.next();
+        if (ph.isVP()) {
+        return null;
+        }
+        if (ph.isNP()
+        || ph.isDTNP()
+        || ph.isDP()
+        || ph.isEP()
+        || ph.isPRP()
+        || ph.isQP()) {
+        incho.addAll(ph);
+        lastPhrase = ph;
+        }
+
+        if (itr.hasNext()) {
+        ph1 = (Phrase) itr.next();
+        if (ph1.isCP()) {
+        ph2 = getInchoative(itr);
+        if (ph2 != null && !ph2.isEmpty()) {
+        incho.addAll(ph1);
+        incho.addAll(ph2);
+        lastPhrase = ph2;
+        } else {
+        itr.previous();
+        }
+
+        } else {
+        itr.previous();
+        }
+        }
+
+        return incho;
+        }
+        return null;
+        }
+
+        public Inchoative getInchoative() {
+        int seek = 0;
+        Inchoative incho = null;
+        if (sentence.isNominal()) {
+
+        seek = trim(sentence.getPhrases());
+
+        incho = this.getInchoative(sentence.getPhrases().listIterator(seek));
+        }
+        if (incho != null && !incho.isEmpty()) {
+        this.begins(incho.get(0).index());
+        this.ends(incho.get(incho.size() - 1).index() + 1);
+        }
+        return incho;
+        }
+
+        private int trim(List<Phrase/> sent) {
+            int seek = 0;
+            if (sent.get(seek).get(0).isPousdoVerb()) {
+            seek += 1;
+            seek += trim(sent.subList(seek, sent.size()));
+            }
+            if (sentence.getPhrases().get(seek).get(0).isConj()) {
+            seek += 1;
+            seek += trim(sent.subList(seek, sent.size()));
+            }
+            return seek;
+            }
+
+            public Word getHead() {
+            Word heady = null;
+            Inchoative incho = this.getInchoative();
+            if (incho != null && !incho.isEmpty()) {
+            heady = getInchoative().get(0);
+            }
+            return heady;
+            }
+
+            public Phrase lastPhrase() {
+            return lastPhrase;
+            }
+            }
+
+    </inchoative>
+    <pridicate> 
+        /*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package saarr_5.framework.inchoative_predicate;
+
+import java.util.ListIterator;
+import saarr_5.framework.phraser.Phrase;
+import saarr_5.morphalize.Sentence;
+import saarr_5.morphalize.Word;
+import static saarr_5.utiles.Utile.pl;
+
+/**
+ *
+ * @author bakee
+ */
+public class Predicate extends Phrase {
+
+    private Sentence sentence;
+    private Inchoative inchoative;
+    private int offset;
+    private boolean detected;
+
+    public Predicate(Sentence sent, Inchoative incho) {
+        sentence = sent;
+        inchoative = incho;
+        offset = incho.ends();
+        detected = false;
+//    pl(offset);
+
+    }
+
+    private Predicate() {
+
+    }
+
+    public Predicate getPredicate() {
+        Predicate pred = null;
+        Phrase predPhr = null;
+        if (sentence.getPhrases().size() > offset) {
+            predPhr = this.getPredicate(sentence.getPhrases().listIterator(offset));
+        }
+        if (predPhr != null && !predPhr.isEmpty()) {
+            pred = new Predicate();
+            pred.addAll(pred);
+
+//            this.begins(predPhr.get(0).index());
+//            this.ends(predPhr.get(predPhr.size() - 1).index() + 1);
+        }
+
+        return pred;
+    }
+
+    private Phrase getPredicate(ListIterator itr) {
+        Phrase predPhr = new Phrase();
+        Phrase ph, ph1, ph2;
+
+        ph1 = new Phrase();
+//        while (true) {
+//            if (!itr.hasNext() || detected) {
+//                break;
+//            }
+//        }
+        if (itr.hasNext()) {
+            ph = (Phrase) itr.next();
+            itr.previous();
+            if (ph.isNP() || ph.isAJP()) {
+                ph1 = singleType(itr);
+            } else if (ph.isVP()) {
+                ph1 = verbalType(itr);
+            } else if (ph.isPP()) {
+                ph1 = prepositionType(itr);
+//                pl(ph1);
+            } else if (ph.isPTP()) {
+                ph1 = placeTimeType(itr);
+            } else if (ph.isRP()) {
+                ph1 = getPredicateRP(itr);
+            } else if (ph.isDTNP()) {
+                ph1 = nominalType(itr);
+            } else if (ph.isCP()) {
+                ph1 = ph;
+            } else {
+                pl("Unknown predicate type of " + ph.getType());
+            }
+            predPhr = ph1;
+        }
+        if (predPhr.isEmpty()) {
+            predPhr = null;
+        }
+        return predPhr;
+    }
+
+    private Phrase singleType(ListIterator itr) {
+        Phrase ph;
+        Phrase phrase = new Phrase();
+        if (itr.hasNext()) {
+            ph = (Phrase) itr.next();
+            if (ph.isAJP() || ph.isNP()) {
+                phrase = ph;
+            } else {
+                itr.previous();
+            }
+        }
+
+        if (itr.hasNext()) {
+            ph = (Phrase) itr.next();
+            if (ph.isCP()) {
+                phrase.addAll(this.singleType(itr));
+            } else {
+                itr.previous();
+            }
+        }
+
+        return phrase;
+    }
+
+    private Phrase verbalType(ListIterator itr) {
+
+        Phrase ph;
+        Phrase phrase = new Phrase();
+        if (itr.hasNext()) {
+            ph = (Phrase) itr.next();
+            if (ph.isVP()) {
+                phrase = ph;
+            } else {
+                itr.previous();
+            }
+        }
+
+        if (itr.hasNext()) {
+            ph = (Phrase) itr.next();
+            if (ph.isCP()) {
+                phrase.addAll(this.verbalType(itr));
+            } else {
+                itr.previous();
+            }
+        }
+        return phrase;
+    }
+
+    private Phrase placeTimeType(ListIterator itr) {
+
+        Phrase ph;
+        Phrase phrase = new Phrase();
+        if (itr.hasNext()) {
+            ph = (Phrase) itr.next();
+            if (ph.isPTP()) {
+                phrase = ph;
+            } else {
+                itr.previous();
+            }
+        }
+
+        if (itr.hasNext()) {
+            ph = (Phrase) itr.next();
+            if (ph.isCP()) {
+                phrase.addAll(this.placeTimeType(itr));
+            } else {
+                itr.previous();
+            }
+        }
+        return phrase;
+    }
+
+    private Phrase nominalType(ListIterator itr) {
+        Phrase ph;
+        Phrase phrase = new Phrase();
+        if (itr.hasNext()) {
+            ph = (Phrase) itr.next();
+            if (ph.isDTNP()) {
+                phrase = ph;
+            } else {
+                itr.previous();
+            }
+        }
+
+        if (itr.hasNext()) {
+            ph = (Phrase) itr.next();
+            if (ph.isCP()) {
+                phrase.addAll(this.nominalType(itr));
+            } else {
+                itr.previous();
+            }
+        }
+
+        return phrase;
+    }
+
+    private Phrase prepositionType(ListIterator itr) {
+
+        Phrase php = null;
+//            pl(php);
+        if (!itr.hasNext()) {
+            return php;
+        }
+        
+        php = (Phrase) itr.next();
+        pl(php);
+        Phrase php1 = null, php2 = null, php3;
+
+        Word prep = php.get(0);
+        if (prep.hasEnc()) {
+            return php;
+        }
+
+        if (itr.hasNext()) {
+
+            php1 = (Phrase) itr.next();
+            php2 = getPredicate(itr);
+//            pl(php2.getType());
+            if (php2 == null) {
+                php.addAll(php1);
+            } else if (php2.isCP()) {
+                php.addAll(php1);
+                php.addAll(php2);
+                itr.next();
+                php3 = getPredicate(itr);
+                if (php3 != null) {
+                    php.addAll(php3);
+                }
+            
+            } else {
+                php = php2;
+            }
+        }
+
+        return php;
+    }
+
+    private Phrase getPredicateRP(ListIterator itr) {
+        Phrase phr, php1 = null, php2 = null;
+        phr = (Phrase) itr.next();
+
+        if (itr.hasNext()) {
+            phr = Predicate.this.getPredicate(itr);
+            if (phr.isVP()) {
+                phr = Predicate.this.getPredicate(itr);
+            }
+        }
+
+        return phr;
+    }
+
+    public Word getHead() {
+        Word head = null;
+        if (this.getPredicate() != null && !this.getPredicate().isEmpty()) {
+            head = getPredicate().get(0);
+        }
+        return head;
+    }
+}
+
+    </pridicate>
+</root>
